@@ -1,0 +1,79 @@
+version: 2
+
+project_name: panely
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: panely
+    main: ./cmd/panely
+    binary: panely
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    goarm:
+      - "7"
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X github.com/cmerk2021/panely/internal/appinfo.Version={{.Version}}
+      - -X github.com/cmerk2021/panely/internal/appinfo.Commit={{.Commit}}
+      - -X github.com/cmerk2021/panely/internal/appinfo.Date={{.Date}}
+
+archives:
+  - id: default
+    formats: [tar.gz]
+    name_template: "panely_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}"
+    files:
+      - README.md
+      - LICENSE
+      - examples/config.yaml
+
+checksum:
+  name_template: checksums.txt
+  algorithm: sha256
+
+nfpms:
+  - id: packages
+    package_name: panely
+    maintainer: OWNER <owner@example.com>
+    description: A configurable TUI dashboard with panels for weather, todos, system stats, and more.
+    homepage: https://github.com/cmerk2021/panely
+    license: MIT
+    formats:
+      - deb
+      - rpm
+      - apk
+    contents:
+      - src: examples/config.yaml
+        dst: /usr/share/doc/panely/config.yaml
+
+changelog:
+  use: git
+  sort: asc
+  groups:
+    - title: Features
+      regexp: '^.*?feat(\(.+\))??!?:.+$'
+      order: 0
+    - title: Bug fixes
+      regexp: '^.*?fix(\(.+\))??!?:.+$'
+      order: 1
+    - title: Other
+      order: 999
+  filters:
+    exclude:
+      - "^docs"
+      - "^chore"
+      - "^test"
+      - "^ci"
+
+release:
+  prerelease: auto
