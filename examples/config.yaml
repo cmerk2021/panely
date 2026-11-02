@@ -1,0 +1,118 @@
+# panely — example configuration showcasing every panel type.
+# Copy pieces into ~/.config/panely/config.yaml and adapt.
+# String values support ${ENV_VAR} and ${ENV_VAR:-default} expansion.
+
+theme: catppuccin-mocha
+refresh: 1s
+
+rows:
+  - height: 25%
+    panels:
+      - type: clock
+        weight: 1
+        title: World Clock
+        options:
+          timezones: [Local, America/New_York, Asia/Tokyo]
+          format24h: true
+          seconds: true
+          big_digits: false
+      - type: weather
+        weight: 2
+        options:
+          location: "Berlin"      # or explicit coordinates: lat: 52.52, lon: 13.40
+          units: metric           # metric | imperial
+
+  - panels:
+      - type: todo
+        weight: 1
+        options:
+          provider: local         # or: caldav (see below)
+      - type: calendar
+        weight: 1
+        options:
+          provider: ics
+          sources:
+            - ~/calendars/personal.ics
+            - https://example.com/holidays.ics
+      - type: sysinfo
+        weight: 2
+        options:
+          processes: 5
+          sort_by: cpu            # cpu | mem
+
+  - height: 25%
+    panels:
+      - type: services
+        weight: 1
+        options:
+          interval: 30s
+          timeout: 5s
+          targets:
+            - name: Website
+              url: https://example.com
+            - name: SSH
+              url: tcp://192.168.1.10:22
+            - name: Router
+              url: ping://192.168.1.1
+      - type: rss
+        weight: 1
+        options:
+          feeds:
+            - https://hnrss.org/frontpage
+          interval: 10m
+      - type: links
+        weight: 1
+        options:
+          links:
+            - { name: Homarr, url: "http://localhost:7575", icon: "🏠", group: Home }
+            - { name: Grafana, url: "http://localhost:3000", icon: "📊", group: Home }
+
+  - height: 20%
+    panels:
+      - type: docker
+        weight: 1
+        options:
+          socket: /var/run/docker.sock
+          all: false              # include stopped containers
+      - type: git
+        weight: 1
+        options:
+          repos: [~/code/panely, ~/code/dotfiles]
+          interval: 60s
+      - type: command
+        weight: 1
+        options:
+          command: "df -h / | tail -1"
+          interval: 60s
+          timeout: 10s
+          strip_ansi: false
+      - type: http_json
+        weight: 1
+        title: GitHub Stars
+        options:
+          url: https://api.github.com/repos/charmbracelet/bubbletea
+          headers:
+            Accept: application/vnd.github+json
+            # Authorization: "Bearer ${GITHUB_TOKEN}"
+          interval: 15m
+          extract:
+            stars: stargazers_count
+            issues: open_issues_count
+          template: |
+            ⭐ {{.stars}}   🐛 {{.issues}}
+
+# Example CalDAV todo provider (set `provider: caldav` on the todo panel):
+#   - type: todo
+#     options:
+#       provider: caldav
+#       url: https://cloud.example.com/remote.php/dav
+#       username: ${CALDAV_USER}
+#       password: ${CALDAV_PASSWORD}
+#       calendar: Tasks
+
+themes:
+  my-theme:
+    base: catppuccin-mocha
+    colors:
+      accent: "#ff79c6"
+      border_focused: "#ff79c6"
